@@ -1,6 +1,7 @@
 Vagrant.configure("2") do |config|
   # Imposta la box da utilizzare
-  config.vm.box = "/Users/andreapetrelli/VM-image/rockyLinux9-vmtools.box"
+  config.vm.box = "apetrelli/rockylinux-9"
+  config.vm.box_version="1.0.0"
   config.vm.provider "vmware_desktop"
 
   # Configurazione della cartella condivisa HGFS
