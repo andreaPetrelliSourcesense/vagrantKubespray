@@ -10,18 +10,24 @@ Vagrant.configure("2") do |config|
 
 
   # Configurazione per il nodo master/worker
-  config.vm.define "master-worker" do |node|
-    node.vm.hostname = "master-worker"
-    node.vm.network "private_network", ip: "192.168.56.10"
-    node.vm.provider "vmware_desktop" do |v|
+  config.vm.define "master-worker" do |master|
+    master.vm.hostname = "master-worker"
+    master.vm.network "private_network", ip: "192.168.56.10"
+    master.vm.provider "vmware_desktop" do |v|
       v.memory = 16384
       v.cpus = 2
     # Copia della chiave pubblica
     #node.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/home/vagrant/.ssh/authorized_keys"
-
     end
 
-    node.vm.provision "shell", inline: <<-SHELL
+    master.vm.provision "file", source: "~/.ssh/id_ed25519.pub", destination: "/home/vagrant/id_ed25519.pub"
+    master.vm.provision "shell", inline: <<-SHELL
+      cat /home/vagrant/id_ed25519.pub >> /home/vagrant/.ssh/authorized_keys
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      rm /home/vagrant/id_ed25519.pub
+    SHELL
+
+    master.vm.provision "shell", inline: <<-SHELL
       echo "Configurazione di master-worker..."
       sudo dnf update -y
       sudo dnf install -y python3 python3-pip
@@ -33,18 +39,24 @@ Vagrant.configure("2") do |config|
   end
 
   # Configurazione per il nodo worker
-  config.vm.define "worker-only" do |node|
-    node.vm.hostname = "worker-only"
-    node.vm.network "private_network", ip: "192.168.56.11"
-    node.vm.provider "vmware_desktop" do |v|
+  config.vm.define "worker-only" do |worker|
+    worker.vm.hostname = "worker-only"
+    worker.vm.network "private_network", ip: "192.168.56.11"
+    worker.vm.provider "vmware_desktop" do |v|
       v.memory = 16384
       v.cpus = 2
     # Copia della chiave pubblica
     #node.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/home/vagrant/.ssh/authorized_keys"
-
     end
 
-    node.vm.provision "shell", inline: <<-SHELL
+    worker.vm.provision "file", source: "~/.ssh/id_ed25519.pub", destination: "/home/vagrant/id_ed25519.pub"
+    worker.vm.provision "shell", inline: <<-SHELL
+      cat /home/vagrant/id_ed25519.pub >> /home/vagrant/.ssh/authorized_keys
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      rm /home/vagrant/id_ed25519.pub
+    SHELL
+
+    worker.vm.provision "shell", inline: <<-SHELL
       echo "Configurazione di worker-only..."
       sudo dnf update -y
       sudo dnf install -y python3 python3-pip
